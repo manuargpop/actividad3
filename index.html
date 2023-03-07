@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+</head>
+<body>
+    <table>
+        <tr><td>ventana de texto:</td></tr>
+        <tr>
+            <td colspan="3">
+                <textarea class="inputTextToSave" cols="80" rows="5"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>nombre del archivo a guardar:</td>
+            <td><input id="inputFileNameToSaveAs"/></td>
+            <td><button onclick="saveTextAsFile()">guardar archivo</button></td>
+        </tr>
+        <tr>
+            <td>subir archivo:</td>
+            <td><input type="file" id="fileToLoad"></td>
+            <td><button onclick="loadFileAsText()">cargar archivo subido</button>
+            <td>
+        </tr>
+    </table>
+</body>
+</html>
+<script type="text/javascript">
+    var delim = "[^~^]"
+
+    function getAllTextBoxesText() 
+    {
+        var allText = "";
+        var textBoxes = document.getElementsByClassName("inputTextToSave");
+        for (var i = 0; i < textBoxes.length; i++) 
+        {
+            allText += textBoxes[i].value + delim;
+        }
+
+        return allText;
+    }
+
+    function splitTextBox(allText) 
+    {
+        var textBoxesTexts = allText.split(delim);
+
+        var textBoxes = document.getElementsByClassName("inputTextToSave");
+        for (var i = 0; i < textBoxes.length; i++) 
+        {
+            if (i >= textBoxesTexts.length)
+                break;
+
+            textBoxes[i].value = textBoxesTexts[i];
+        }
+    }
+
+    function saveTextAsFile() 
+    {
+        var textToSave = getAllTextBoxesText();
+        var textToSaveAsBlob = new Blob([textToSave], { type: "text/plain" });
+        var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+        var fileNameToSaveAs = document.getElementById("inputFileNameToSaveAs").value;
+
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        downloadLink.href = textToSaveAsURL;
+        downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+
+        downloadLink.click();
+    }
+
+    function destroyClickedElement(event) 
+    {
+        document.body.removeChild(event.target);
+    }
+
+    function loadFileAsText() 
+    {
+        var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+        var fileReader = new FileReader();
+        fileReader.onload = function (fileLoadedEvent) 
+        {
+            var textFromFileLoaded = fileLoadedEvent.target.result;
+            splitTextBox(textFromFileLoaded);
+        };
+        fileReader.readAsText(fileToLoad, "UTF-8");
+    }
+</script>
